@@ -1,0 +1,148 @@
+---
+title: "Top Ranked City"
+author: "Ryan Nguyen Kimaya Rane Rodridgo Vasquez"
+date: "10/31/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r setOptions, message=FALSE,echo=FALSE,warning=FALSE}
+suppressPackageStartupMessages(library(knitr)) 
+opts_chunk$set(cache=TRUE, message=FALSE,size = 'footnotesize',warning=FALSE)
+op <- options(gvis.plot.tag='chart') 
+```
+
+
+
+```{r}
+devtools::install_github("patilv/gudatavizfa17",auth_token="d183f669695ecf83cd0bf2875db10f9fe195acde")
+library(gudatavizfa17)
+opendataviz()
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(googleVis)
+```
+
+## 1. Please look at relationships between different variables and identify variables that appear to be strongly related to having a higher rank in the survey. 
+
+```{r}
+## Making a new dataset compiling all the variables and values
+facetcities=gather(bcities, "Variable", "Values", 1,3:13)
+```
+
+```{r}
+## Taking out "City" as a variable
+str(facetcities)
+facetcities=facetcities[facetcities$Variable!="City",]
+```
+
+```{r}
+## Converting values that were categorized as characters back to numeric values
+facetcities$Values=as.numeric(facetcities$Values)
+```
+
+## Facet Wrap of the variables plotted against Rank
+```{r}
+ggplot(facetcities,aes(x=Rank,y=Values)) + geom_point(size=.5)+ facet_wrap(~Variable, scales = "free")+geom_smooth(method="lm")
+```
+
+When identifying varibales that strongly correlate to rank, the variables that immediately stand out are number of bars, number of colleges, number of Museums, percent with graduate degree, number of pro sports teams, and restuarants. The cities that are ranked in the top 10 on average have more bars, colleges, museums, and restaurants. However, the strongest factors for rank seem to be percent with graduate degree, becuase it has the most significant slope. The cities ranked in top 10 on average have between 10-20 percent with a graduate degree where as cities ranked closer to the bottom have less than 10 percent with a graduate degree. Factors that very weakly correlate with rank are libraries -- the more libraries the better the rank, population -- the higher the population the better the rank, this could be becuase more people want to move to better ranked cities, and park acres per 1000 residents-- the worse ranks have more park acrs per 1000 residents. These graphs show a line of best fit with a small slope. Percent unemployed and median household income seems to have no correlation to rank becuase the slope of the line of best fit is essentially zero. Thus, the strongest factor is percent with a graduate degree.
+
+##2. Plot the cities on a map of the US. 
+```{r}
+names(bcities)[4]="Bars"
+names(bcities)[3]="Pop"
+names(bcities)[8]="ProSpo"
+```
+
+```{r}
+MMap <- gvisGeoChart(bcities, locationvar = "City", options=list(region="US", displayMode="markers", resolution="provinces", width=600, height=400))
+plot(MMap)
+```
+
+##3. Identify the States in which these cities lie and then develop a choropleth that colors different states based on the number of cities that are present in each State.
+
+##Add in States
+```{r}
+cityState=bcities%>%group_by(City)%>%summarize(Rank, Bars)
+cityState$State[cityState$City == "Arlington"] <- "Texas"
+cityState$State[cityState$City == "Anchorage"] <- "Alaska"
+cityState$State[cityState$City == "Seattle"] <- "Washington"
+cityState$State[cityState$City == "Washington"] <- "Utah"
+cityState$State[cityState$City == "Boston"] <- "Massachusetts"
+cityState$State[cityState$City == "Portland"] <- "Oregon"
+cityState$State[cityState$City == "Denver"] <- "Colorado"
+cityState$State[cityState$City == "Austin"] <- "Texas"
+cityState$State[cityState$City == "San Diego"] <- "California"
+cityState$State[cityState$City == "St. Paul"] <- "Minnesota"
+cityState$State[cityState$City == "Pittsburgh"] <- "Pennsylvania"
+cityState$State[cityState$City == "Minneapolis"] <- "Minnesota"
+cityState$State[cityState$City == "Nashvile"] <- "Tennessee"
+cityState$State[cityState$City == "New Orleans"] <- "Louisiana"
+cityState$State[cityState$City == "Kansas City"] <- "Missouri"
+cityState$State[cityState$City == "Atlanta"] <- "Georgia"
+cityState$State[cityState$City == "Madison"] <- "Alabama"
+cityState$State[cityState$City == "Raleigh"] <- "North Carolina"
+cityState$State[cityState$City == "Honolulu"] <- "Hawaii"
+cityState$State[cityState$Rank == "20"] <- "Ohio"
+cityState$State[cityState$City == "Cincinatti"] <- "Ohio"
+cityState$State[cityState$City == "Houston"] <- "Texas"
+cityState$State[cityState$City == "Oklahoma City"] <- "Oklahoma"
+cityState$State[cityState$City == "Philadelphia"] <- "Pennsylvania"
+cityState$State[cityState$City == "Lexington"] <- "Kentucky"
+cityState$State[cityState$City == "Milwaukee"] <- "Wisconsin"
+cityState$State[cityState$City == "Arlington"] <- "Texas"
+cityState$State[cityState$City == "Chicago"] <- "Illinois"
+cityState$State[cityState$City == "Baltimore"] <- "Maryland"
+cityState$State[cityState$City == "San Antonio"] <- "Texas"
+cityState$State[cityState$City == "Oakland"] <- "California"
+cityState$State[cityState$City == "Rochester"] <- "New York"
+cityState$State[cityState$City == "San Jose"] <- "California"
+cityState$State[cityState$City == "Tampa"] <- "Florida"
+cityState$State[cityState$City == "Lincoln"] <- "Nebraska"
+cityState$State[cityState$City == "Colorado Springs"] <- "Colorado"
+cityState$State[cityState$City == "Indianapolis"] <- "Indiana"
+cityState$State[cityState$City == "Tulsa"] <- "Oklahoma"
+cityState$State[cityState$City == "Charlotte"] <- "North Carolina"
+cityState$State[cityState$City == "Virgina Beach"] <- "Virgina"
+cityState$State[cityState$Rank == "41"] <- "Texas"
+cityState$State[cityState$Rank == "44"] <- "Phoenix"
+cityState$State[cityState$Rank == "9"] <- "California"
+cityState$State[cityState$Rank == "1"] <- "California"
+cityState$State[cityState$Rank == "40"] <- "Virginia"
+cityState$State[cityState$Rank == "35"] <- "Florida"
+cityState$State[cityState$City == "Reno"] <- "Nevada"
+cityState$State[cityState$City == "Scottsdale"] <- "Arizona"
+cityState$State[cityState$City == "Pheonix"] <- "Arizonia"
+cityState$State[cityState$City == "Chesapeake"] <- "Virgina"
+cityState$State[cityState$City == "Cleveland"] <- "Ohio"
+cityState$State[cityState$City == "St. Louis"] <- "Missouri"
+cityState$State[cityState$City == "Omaha"] <- "Nebraska"
+cityState$State[cityState$City == "Anchorage"] <- "Alaska"
+cityState$State[cityState$City == "Los Angeles"] <- "California"
+cityState$State[cityState$City == "New York"] <- "New York"
+```
+
+```{r}
+cityState = cityState %>% group_by(State) %>% summarise(Count = n())
+str(cityState)
+```
+
+```{r}
+GeoStates <- gvisGeoChart(cityState, "State","Count",
+                          options=list(region="US", displayMode="regions", resolution="provinces",
+                                       width=600, height=400))
+plot(GeoStates)
+```
+
+In analysis of the choropleth map, we see that twenty percent of major cities are located in just two states, California and Texas.  States with a major sitting seemed to have a trend of staying close to the boarders of the country.  We also see a patch of states without major cities right inbetween the Northwest and Mid-West region, the region of the US that is most landlocked part of the countries boarders.  Over all we see a trend of major cities being placed on the boards of the country, espeically in places that are near water and not in the Midwest/Northwest Region.
+
+
